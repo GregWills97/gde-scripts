@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Box placement
+PAD="20"
+MSIZE="1920"
+WIDTH="175"
+
+PROMPT="VPN:"
+X=$(expr $MSIZE - $WIDTH - $PAD)
+Y="40"
+Z=$WIDTH
+DMENU="dmenu -c -x ${X} -y ${Y} -z ${Z} -l 15"
+
+# Grab active/available connectiosn
+ACTIVE="$(/bin/ls -d /sys/class/net/* | grep "wg0" | sed 's/\/sys\/class\/net\///')"
+CONNECTIONS="$(/bin/ls /etc/NetworkManager/system-connections/ | grep "wg0" | sed 's/.nmconnection//')"
+PLACES="${CONNECTIONS//-wg0/} Kill"
+SELECTION=$(printf '%s\n' $PLACES | $DMENU -p "${PROMPT}")
+
+# Kill active connections, connect to selected
+[ -z $SELECTION ] && exit
+for con in $ACTIVE; do nmcli connection down $con; done
+[ "$SELECTION" = "Kill" ] && exit
+nmcli connection up "${SELECTION}-wg0"

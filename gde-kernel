@@ -1,0 +1,43 @@
+#!/bin/bash
+
+curr_kernel=`uname -r`
+
+error() {
+	printf "Error: %s\\n" "$1" >&2
+	exit 1;
+}
+
+build_kern() {
+	pushd /usr/src/linux
+		make oldconfig && \
+		make -j$(nproc) && \
+		make modules_install && \
+		# emerge @module-rebuild && \ # Only needed for nvidia drivers
+		make install || return 1
+	popd
+}
+
+redo_bootdir() {
+	#Cleanup and create boot image
+	rm /boot/*${curr_kernel}
+	rm -rf /usr/src/linux-${curr_kernel}
+	rm -rf /lib/modules/${curr_kernel}
+	grub-mkconfig -o /boot/grub/grub.cfg
+}
+
+# Root user check
+[ "$(id -u)" = 0 ] || error "Must be root"
+
+#Select Kernel
+eselect kernel list
+read -p 'Select your kernel: ' sel
+eselect kernel set ${sel}
+
+# Insert config
+cp -v /etc/gentoo-kernel.conf /usr/src/linux/.config
+
+build_kern || error "Couldn't build kernel"
+redo_bootdir || error "Failed making grub config"
+
+#Replace config
+cp -v /usr/src/linux/.config /etc/gentoo-kernel.conf

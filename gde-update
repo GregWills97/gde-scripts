@@ -1,0 +1,9 @@
+#!/bin/bash
+
+[ "$(id -u)" != 0 ] && echo "Must be root" && exit 1;
+
+eix-sync && \
+emerge --verbose -uDN --with-bdeps=y @world && \
+emerge -c && \
+eclean-dist -d && \
+dispatch-conf

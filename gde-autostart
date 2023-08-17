@@ -1,0 +1,7 @@
+#! /bin/bash
+picom -f --corner-radius=7 &
+nitrogen --restore &
+/usr/bin/setxkbmap -option "caps:swapescape"
+pulseaudio --start
+xrdb -merge /home/greg/.Xresources
+dwmblocks &
