@@ -1,9 +1,18 @@
 #!/bin/bash
 
+error() {
+	printf "Error: %s\\n" "$1" >&2
+	exit 1;
+}
+
 [ "$(id -u)" != 0 ] && echo "Must be root" && exit 1;
 
-eix-sync && \
+#Sync and check for kernel update
+eix-sync || error "Failed to sync"
+kupdate="$(eix -u gentoo-sources)"
+
 emerge --verbose -uDN --with-bdeps=y @world && \
 emerge -c && \
 eclean-dist -d && \
 dispatch-conf
+[ "$kupdate" != "No matches found" ] && gde-kernel
