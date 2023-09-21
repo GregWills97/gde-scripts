@@ -15,4 +15,4 @@ emerge --verbose -uDN --with-bdeps=y @world && \
 emerge -c && \
 eclean-dist -d && \
 dispatch-conf
-[ "$kupdate" != "No matches found" ] && gde-kernel
+[ "$kupdate" != "No matches found" ] && echo "Update"
