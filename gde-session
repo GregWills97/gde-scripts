@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-# Find user and session ID
-SID=$(loginctl list-sessions | awk '{if (NR==2) {print $1}}')
+# Find window manager
+WM=$(echo $DESKTOP_SESSION)
 
 # Define dmenu command
 DMENU="dmenu -l 10"
@@ -23,7 +23,7 @@ main() {
     case $choice in
         'Logout')
             if [[ "$(echo -e "Yes\nNo" | ${DMENU} -p "${choice}?" "${@}" )" == "Yes" ]]; then
-                loginctl terminate-session ${SID}
+                pkill $WM
             else
                 exit 0
             fi
